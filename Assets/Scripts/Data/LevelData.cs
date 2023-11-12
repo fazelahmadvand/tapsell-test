@@ -6,7 +6,7 @@ using UnityEngine;
 [CreateAssetMenu(menuName = Utility.SCRIPTABLE_PATH + "LevelData", fileName = "Level Data")]
 public class LevelData : ScriptableObject
 {
-    [SerializeField] private List<LevelInfo> levels = new();
+    [SerializeField] private List<LevelDetals> levels = new();
 
     public int AllLevelsCount
     {
@@ -15,14 +15,28 @@ public class LevelData : ScriptableObject
             int count = 0;
             foreach (var level in levels)
             {
-                count += level.levelCardCounts.Count;
+                count += level.levels.Count;
             }
             return count;
         }
     }
 
-    public LevelInfo GetLevelInfo(DifficultyEnum diff) => levels.FirstOrDefault(l => l.difficulty == diff);
-    public int LargestCardCount => levels.SelectMany(l => l.levelCardCounts).Max();
+    public LevelDetals GetLevelInfo(DifficultyEnum diff) => levels.FirstOrDefault(l => l.difficulty == diff);
+    public int LargestCardCount => levels.SelectMany(l => l.levels).Select(l => l.cardCount).Max();
+
+    public void SetIds()
+    {
+        int id = 1;
+        foreach (var level in levels)
+        {
+            foreach (var item in level.levels)
+            {
+                item.level = id;
+                id++;
+            }
+        }
+    }
+
 
 }
 
@@ -34,11 +48,16 @@ public enum DifficultyEnum
 }
 
 [System.Serializable]
-public struct LevelInfo
+public struct LevelDetals
 {
     public DifficultyEnum difficulty;
-    public List<int> levelCardCounts;
-    public int startNum, endNum;
+    public List<LevelInfo> levels;
 
+}
 
+[System.Serializable]
+public class LevelInfo
+{
+    public int level;
+    public int cardCount;
 }

@@ -46,15 +46,18 @@ public class MenuManager : Singleton<MenuManager>
 
         missionCardHolder.HideAll();
         var cards = missionCardHolder.Cards;
-        for (int i = 0; i < info.levelCardCounts.Count; i++)
+        for (int i = 0; i < info.levels.Count; i++)
         {
             var ii = i;
             var card = cards[ii];
+            var currentLevel = info.levels[ii];
             card.Show();
-            card.UpdateCard(info.difficulty.ToString(), null, () =>
+            string name = $"{info.difficulty} \n Level: {currentLevel.level}";
+            card.UpdateCard(name, null, () =>
             {
-                Debug.Log("Start Mission");
-                LevelManager.Instance.StartLevel(info.difficulty, info.levelCardCounts[ii]);
+
+                LevelManager.Instance.StartLevel(info.difficulty, currentLevel);
+
             });
         }
     }

@@ -17,10 +17,11 @@ public class LevelManager : Singleton<LevelManager>
     [Header("Header")]
     [SerializeField] private Button pauseBtn;
     [SerializeField] private TMP_Text timeTxt;
+    [SerializeField] private TMP_Text levelInfoTxt;
 
     [Header("Current Level Info")]
     [SerializeField] private DifficultyEnum currentLevelDifficulty;
-    [SerializeField] private int currentLevelCardCount;
+    [SerializeField] private LevelInfo currentLevelInfo;
     [SerializeField] private float startTime;
     [SerializeField] private bool isLevelStart;
 
@@ -44,14 +45,15 @@ public class LevelManager : Singleton<LevelManager>
 
     }
 
-    public void StartLevel(DifficultyEnum difficulty, int count)
+    public void StartLevel(DifficultyEnum difficulty, LevelInfo info)
     {
         currentLevelDifficulty = difficulty;
-        currentLevelCardCount = count;
+        currentLevelInfo = info;
         startTime = 0;
         isLevelStart = true;
         root.SetActive(true);
         HandleCards();
+        HandleLevelInfo();
     }
     public void RestartLevel()
     {
@@ -79,7 +81,7 @@ public class LevelManager : Singleton<LevelManager>
     {
         cardHolder.HideAll();
         var cards = cardHolder.Cards;
-        for (int i = 0; i < currentLevelCardCount; i++)
+        for (int i = 0; i < currentLevelInfo.cardCount; i++)
         {
             var c = cards[i];
             c.Show();
@@ -87,6 +89,10 @@ public class LevelManager : Singleton<LevelManager>
         }
     }
 
+    private void HandleLevelInfo()
+    {
+        levelInfoTxt.text = $"{currentLevelDifficulty} - {currentLevelInfo.level}";
+    }
 
 
 }
