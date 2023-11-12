@@ -1,6 +1,5 @@
+using DG.Tweening;
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -18,11 +17,27 @@ public class CardView : View
         //img.sprite = pic;
 
         btn.onClick.RemoveAllListeners();
-        btn.onClick.AddListener(() => OnClick?.Invoke());
-
+        btn.onClick.AddListener(() =>
+        {
+            OnClick?.Invoke();
+        });
 
 
     }
 
 
+    public void RotateCard(Vector3 rotate, float duration)
+    {
+        root.transform.DORotate(rotate, duration);
+    }
+
+    public void HideText()
+    {
+        txt.gameObject.SetActive(false);
+    }
+
+    public void ShowText()
+    {
+        txt.gameObject.SetActive(true);
+    }
 }

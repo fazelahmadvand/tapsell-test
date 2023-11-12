@@ -659,6 +659,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   levelData: {fileID: 11400000, guid: 2bc9ef2ec744e594b82f867708c2bd8f, type: 2}
+  duration: 0.1
+  rotate: {x: 0, y: 90, z: 0}
 --- !u!4 &261307889
 Transform:
   m_ObjectHideFlags: 0
@@ -839,6 +841,9 @@ MonoBehaviour:
     cardCount: 0
   startTime: 0
   isLevelStart: 0
+  duration: 0.2
+  rotate: {x: 0, y: 360, z: 0}
+  clickedCards: []
 --- !u!1 &447024751
 GameObject:
   m_ObjectHideFlags: 0
@@ -1930,7 +1935,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   root: {fileID: 0}
-  card: {fileID: 5842296511336012433, guid: ebd0f7ae78bbc7a41819674a9652b3f9, type: 3}
+  card: {fileID: 2400875373956082267, guid: ed193f17ace1e9a44b846ab6b6ec318b, type: 3}
   parent: {fileID: 1617030494}
 --- !u!1 &1025991522
 GameObject:
