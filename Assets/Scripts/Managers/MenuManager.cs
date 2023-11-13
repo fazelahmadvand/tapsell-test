@@ -51,11 +51,12 @@ public class MenuManager : Singleton<MenuManager>
             var card = cards[ii];
             var currentLevel = info.levels[ii];
             card.Show();
-            string name = $"{info.difficulty} \n Level: {currentLevel.level} \n Target Time: {currentLevel.time}s \n Cards: {currentLevel.cardCount} \n Last Score: {currentLevel.lastScore} \n Highest Score: {currentLevel.highestScore}";
+            string name = $"{info.difficulty} - {currentLevel.level} \n Target Time: {currentLevel.time}s \n Cards: {currentLevel.cardCount} \n Last Score: {currentLevel.lastScore} \n Highest Score: {currentLevel.highestScore}";
             card.UpdateCard(name, null, () =>
             {
                 missionCardHolder.MakeThemWhite();
                 card.SetColor(selectCardColor);
+                SoundManager.Instance.Click();
 
                 LevelManager.Instance.StartLevel(info.difficulty, currentLevel);
 

@@ -75,12 +75,14 @@ public class LevelManager : Singleton<LevelManager>
             isLevelStart = false;
             pauseBtn.interactable = isLevelStart;
             levelData.SetScore(currentLevelInfo.level, Score);
+            SoundManager.Instance.Win();
         };
 
         OnLose += () =>
         {
             startTime = 0;
             isLevelStart = false;
+            SoundManager.Instance.Lose();
 
             pauseBtn.interactable = isLevelStart;
             pauseView.ShowResult(false);
@@ -156,7 +158,7 @@ public class LevelManager : Singleton<LevelManager>
             c.HideText();
             c.UpdateCard(c.name, null, () =>
             {
-
+                SoundManager.Instance.Click();
                 if (!clickedCards.Contains(c))
                     c.transform.DORotate(rotate, duration, RotateMode.FastBeyond360).onComplete += () =>
                     {
@@ -200,6 +202,7 @@ public class LevelManager : Singleton<LevelManager>
                 {
                     card.transform.DOScale(Vector3.zero, duration);
                 }
+                SoundManager.Instance.Perfect();
                 Score++;
             }
             else
