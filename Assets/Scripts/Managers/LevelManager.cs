@@ -84,6 +84,7 @@ public class LevelManager : Singleton<LevelManager>
             isLevelStart = false;
             SoundManager.Instance.Lose();
 
+
             pauseBtn.interactable = isLevelStart;
             pauseView.ShowResult(false);
             cardHolder.HandleInteractable(isLevelStart);
