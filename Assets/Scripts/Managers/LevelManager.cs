@@ -2,6 +2,7 @@ using DG.Tweening;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -19,12 +20,14 @@ public class LevelManager : Singleton<LevelManager>
     [SerializeField] private Button pauseBtn;
     [SerializeField] private TMP_Text timeTxt;
     [SerializeField] private TMP_Text levelInfoTxt;
+    [SerializeField] private TMP_Text scoreTxt;
 
     [Header("Current Level Info")]
     [SerializeField] private DifficultyEnum currentLevelDifficulty;
     [SerializeField] private LevelInfo currentLevelInfo;
     [SerializeField] private float startTime;
     [SerializeField] private bool isLevelStart;
+    [SerializeField] private int score;
 
     [Header("Polish")]
     [SerializeField] private float duration = .1f;
@@ -32,12 +35,25 @@ public class LevelManager : Singleton<LevelManager>
     [SerializeField] private float delayTime = .5f;
 
 
+    public static event Action OnWin;
+    public static event Action OnLose;
+    public event Action OnStart;
 
+
+
+    private int Score
+    {
+        get => score;
+        set
+        {
+            score = value;
+            scoreTxt.text = $"Score: {score}";
+        }
+    }
 
 
     private readonly Queue<CardView> clickedCards = new();
-
-    private readonly List<int> randomNumber = new();
+    private readonly Queue<int> randomNumber = new();
 
     public void Init()
     {
@@ -48,9 +64,40 @@ public class LevelManager : Singleton<LevelManager>
         pauseBtn.onClick.RemoveAllListeners();
         pauseBtn.onClick.AddListener(() =>
         {
-            pauseView.Show();
+            pauseView.ShowPause();
 
         });
+
+
+        OnWin += () =>
+        {
+            pauseView.ShowResult(true);
+            isLevelStart = false;
+            pauseBtn.interactable = isLevelStart;
+            levelData.SetScore(currentLevelInfo.level, Score);
+        };
+
+        OnLose += () =>
+        {
+            startTime = 0;
+            isLevelStart = false;
+
+            pauseBtn.interactable = isLevelStart;
+            pauseView.ShowResult(false);
+            cardHolder.HandleInteractable(isLevelStart);
+        };
+
+        OnStart += () =>
+        {
+            isLevelStart = true;
+            SetTime();
+            clickedCards.Clear();
+            pauseBtn.interactable = isLevelStart;
+            HandleCards();
+            Score = 0;
+            cardHolder.HandleInteractable(isLevelStart);
+
+        };
 
     }
 
@@ -58,22 +105,22 @@ public class LevelManager : Singleton<LevelManager>
     {
         currentLevelDifficulty = difficulty;
         currentLevelInfo = info;
-        startTime = 0;
-        isLevelStart = true;
+        OnStart?.Invoke();
         root.SetActive(true);
-        HandleCards();
         HandleLevelInfo();
     }
     public void RestartLevel()
     {
-        startTime = 0;
-        HandleCards();
+        OnStart?.Invoke();
     }
 
     public void EndLevel()
     {
         isLevelStart = false;
-        startTime = 0;
+        SetTime();
+        clickedCards.Clear();
+
+        MenuManager.Instance.UpdateView();
         root.SetActive(false);
     }
 
@@ -81,8 +128,13 @@ public class LevelManager : Singleton<LevelManager>
     {
         if (isLevelStart)
         {
-            startTime += Time.deltaTime;
+            startTime -= Time.deltaTime;
             timeTxt.text = Utility.Timer(startTime);
+            if (startTime <= 0)
+            {
+
+                OnLose?.Invoke();
+            }
         }
 
 
@@ -94,7 +146,7 @@ public class LevelManager : Singleton<LevelManager>
 
         cardHolder.HideAll();
         var cards = cardHolder.Cards;
-        var list = new List<GameObject>();
+        var list = new List<CardView>();
 
         for (int i = 0; i < currentLevelInfo.cardCount; i++)
         {
@@ -102,8 +154,7 @@ public class LevelManager : Singleton<LevelManager>
             c.Show();
             c.transform.localScale = Vector3.one;
             c.HideText();
-            c.name = name;
-            c.UpdateCard(name, null, () =>
+            c.UpdateCard(c.name, null, () =>
             {
 
                 if (!clickedCards.Contains(c))
@@ -115,7 +166,7 @@ public class LevelManager : Singleton<LevelManager>
                     };
 
             });
-            list.Add(c.gameObject);
+            list.Add(c);
         }
 
         SetRandomNumbers(list);
@@ -125,6 +176,12 @@ public class LevelManager : Singleton<LevelManager>
     private void HandleLevelInfo()
     {
         levelInfoTxt.text = $"{currentLevelDifficulty} - {currentLevelInfo.level}";
+    }
+
+
+    private void SetTime()
+    {
+        startTime = levelData.GetTime(currentLevelInfo.level);
     }
 
     private IEnumerator ManageSelectedCards()
@@ -143,7 +200,7 @@ public class LevelManager : Singleton<LevelManager>
                 {
                     card.transform.DOScale(Vector3.zero, duration);
                 }
-
+                Score++;
             }
             else
             {
@@ -157,6 +214,7 @@ public class LevelManager : Singleton<LevelManager>
             }
 
         }
+        StartCoroutine(HandleWin());
     }
 
     private void FillRandomNumber()
@@ -166,18 +224,45 @@ public class LevelManager : Singleton<LevelManager>
 
         for (var i = 0; i < count; i++)
         {
-            randomNumber.Add(i);
+            randomNumber.Enqueue(i);
         }
 
 
     }
 
-    private void SetRandomNumbers(List<GameObject> list)
+    private void SetRandomNumbers(List<CardView> list)
     {
 
+        while (list.Count > 0)
+        {
+            int rnd = UnityEngine.Random.Range(0, list.Count);
+            var first = list[rnd];
+            list.RemoveAt(rnd);
 
+            rnd = UnityEngine.Random.Range(0, list.Count);
+            var second = list[rnd];
+            list.RemoveAt(rnd);
+
+            string rndName = randomNumber.Dequeue().ToString();
+            first.name = rndName;
+            second.name = rndName;
+            first.UpdateText(rndName);
+            second.UpdateText(rndName);
+
+
+        }
     }
 
+    private IEnumerator HandleWin()
+    {
+        yield return new WaitForSeconds(duration + .1f);
+        var removed = cardHolder.Cards.Where(c => c.gameObject.activeSelf && c.transform.localScale == Vector3.zero).ToList();
+        if (removed.Count == currentLevelInfo.cardCount)
+        {
+
+            OnWin?.Invoke();
+        }
+    }
 
 }
 

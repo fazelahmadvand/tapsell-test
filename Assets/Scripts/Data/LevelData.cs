@@ -23,6 +23,14 @@ public class LevelData : ScriptableObject
 
     public LevelDetals GetLevelInfo(DifficultyEnum diff) => levels.FirstOrDefault(l => l.difficulty == diff);
     public int LargestCardCount => levels.SelectMany(l => l.levels).Select(l => l.cardCount).Max();
+    public int GetTime(int level) => levels.SelectMany(l => l.levels).Where(i => i.level == level).First().time;
+    public void SetScore(int level, int score)
+    {
+        var info = levels.SelectMany(l => l.levels).Where(i => i.level == level).First();
+        info.lastScore = score;
+        if (score > info.highestScore)
+            info.highestScore = score;
+    }
 
     public void SetIds()
     {
@@ -58,6 +66,9 @@ public struct LevelDetals
 [System.Serializable]
 public class LevelInfo
 {
-    public int level;
+    [HideInInspector] public int level;
     public int cardCount;
+    public int time;
+    public int lastScore;
+    public int highestScore;
 }

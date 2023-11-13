@@ -9,6 +9,11 @@ public static class Utility
 
     private const int EACH_MIN = 60;
 
+
+    public const string WIN = "Win";
+    public const string LOSE = "Lose";
+
+
     public static string Timer(float startedTime)
     {
         int sec = (int)startedTime % EACH_MIN;

@@ -23,6 +23,22 @@ public class CardHolder : View
         }
     }
 
+    public void HandleInteractable(bool isActive)
+    {
+        foreach (var c in cards)
+        {
+            c.HandleInteractable(isActive);
+        }
+    }
+
+    public void MakeThemWhite()
+    {
+        foreach (var item in cards)
+        {
+            item.SetColor(Color.white);
+        }
+    }
+
     public void HideAll()
     {
         foreach (var c in cards)

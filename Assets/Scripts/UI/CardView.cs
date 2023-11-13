@@ -25,10 +25,9 @@ public class CardView : View
 
     }
 
-
-    public void RotateCard(Vector3 rotate, float duration)
+    public void UpdateText(string text)
     {
-        root.transform.DORotate(rotate, duration);
+        txt.text = text;
     }
 
     public void HideText()
@@ -36,8 +35,18 @@ public class CardView : View
         txt.gameObject.SetActive(false);
     }
 
+    public void SetColor(Color col)
+    {
+        img.color = col;
+    }
     public void ShowText()
     {
         txt.gameObject.SetActive(true);
     }
+
+    public void HandleInteractable(bool isActive)
+    {
+        btn.interactable = isActive;
+    }
+
 }
